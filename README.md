@@ -1,2 +1,2 @@
 # codewars.com
-solve problems with codewars.com
+problem solving from codewars.com

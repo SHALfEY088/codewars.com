@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"sort"
 )
 
@@ -17,7 +18,7 @@ func main() { //       0       1        2       3		   4
 
 func SumOfIntervals(intervals [][2]int) int {
 
-	sort.SliceStable(intervals, func(i, j int) bool {
+	sort.Slice(intervals, func(i, j int) bool {
 		return intervals[i][0] < intervals[j][0]
 	})
 
@@ -43,6 +44,68 @@ func SumOfIntervals(intervals [][2]int) int {
 	// fmt.Println(length)
 
 	return length
+}
+
+func SumOfIntervals2(intervals [][2]int) int {
+	fmt.Println(intervals)
+	added := make([][2]int, 0)
+	i := 0
+	for {
+		start, end := intervals[i][0], intervals[i][1]
+		g, ok, in := check(added, start, end)
+		if ok {
+			f(&added[g], start, end)
+		} else if in {
+			goto next
+		} else {
+			added = append(added, [2]int{start, end})
+		}
+	next:
+		i++
+		if i == len(intervals) {
+			if len(added) == len(intervals) {
+				break
+			} else {
+				i = 0
+				intervals = added
+				added = make([][2]int, 0)
+			}
+		}
+	}
+	var sum int
+	for i := 0; i < len(added); i++ {
+		sum += added[i][1] - added[i][0]
+	}
+	return sum
+}
+
+func f(ai *[2]int, ss, es int) {
+	sf, ef := ai[0], ai[1]
+	switch {
+	// sfss-------ss-------ssef------------------es
+	case ss <= ef && ss >= sf && es > ef:
+		ai[1] = es
+	// sssf------------sf-----------sfes-------------ef
+	case ss <= sf && sf <= es && ef >= es:
+		ai[0] = ss
+	// ss-----------sf-----------------ef-------------es
+	case ss <= sf && ef <= es:
+		ai[0], ai[1] = ss, es
+	}
+}
+
+func check(added [][2]int, start, end int) (int, bool, bool) {
+	for i := 0; i < len(added); i++ {
+		if added[i][0] >= start && added[i][0] <= end ||
+			added[i][1] >= start && added[i][1] <= end {
+			return i, true, false
+		}
+		if start >= added[i][0] && start <= added[i][1] &&
+			end >= added[i][0] && end <= added[i][1] {
+			return 0, false, true
+		}
+	}
+	return 0, false, false
 }
 
 // func SumOfIntervals(intervals [][2]int) int {
